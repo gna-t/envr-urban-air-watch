@@ -394,13 +394,26 @@ button:disabled {
   line-height: 1.7;
 }
 
+.city-badge {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.instrument-primary {
+  gap: 8px;
+}
+
 #pm25-value,
 #pm10-value,
 #ozone-value {
   font-size: clamp(2.1rem, 3.2vw, 3rem);
   line-height: 1.05;
   word-break: keep-all;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
 }
 
 #updated-value {

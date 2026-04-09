@@ -419,6 +419,7 @@ function updateMainDashboard(data, location) {
   ozoneHint.textContent = getOzoneHint(current.ozone);
   updatedValue.textContent = formatLocalDateTime(current.time);
   updatedCityLabel.textContent = `Local time for ${locationLabel}: ${formatLocalTime(current.time)}`;
+  updatedCityLabel.title = updatedValue.textContent;
 
   healthTitle.textContent = `${category.label} Conditions`;
   healthMessage.textContent = getHealthInterpretation(aqi);
@@ -559,6 +560,7 @@ function showMainError(message) {
   ozoneHint.textContent = "Source interpretation unavailable.";
   updatedValue.textContent = "--";
   updatedCityLabel.textContent = "Local time unavailable";
+  updatedCityLabel.removeAttribute("title");
   healthTitle.textContent = "Current Guidance";
   healthMessage.textContent = "Health guidance could not be loaded.";
   trendTitle.textContent = "Short-Term Direction";
