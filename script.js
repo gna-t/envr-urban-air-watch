@@ -133,6 +133,18 @@ function formatLocalDateTime(dateTimeString) {
   });
 }
 
+function formatLocalTime(dateTimeString) {
+  const [datePart, timePart] = dateTimeString.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+  const date = new Date(year, month - 1, day, hour, minute);
+
+  return date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
 // Convert the API hour string into a short chart label.
 function formatHourLabel(dateTimeString) {
   const hourValue = Number(dateTimeString.split("T")[1].split(":")[0]);
@@ -406,7 +418,7 @@ function updateMainDashboard(data, location) {
   pm25Hint.textContent = getPm25Hint(current.pm2_5);
   ozoneHint.textContent = getOzoneHint(current.ozone);
   updatedValue.textContent = formatLocalDateTime(current.time);
-  updatedCityLabel.textContent = `Local time for ${locationLabel}`;
+  updatedCityLabel.textContent = `Local time for ${locationLabel}: ${formatLocalTime(current.time)}`;
 
   healthTitle.textContent = `${category.label} Conditions`;
   healthMessage.textContent = getHealthInterpretation(aqi);
