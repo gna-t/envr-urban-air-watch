@@ -1,4 +1,3 @@
-// Default locations used when the page first loads.
 const defaultLocation = {
   city: "Houston",
   state: "Texas",
@@ -71,7 +70,6 @@ let pendingCompareMatches = [];
 let mainCityState = null;
 let comparisonCityState = null;
 
-// Build the geocoding URL for a city search inside the United States.
 function createGeocodingUrl(cityName) {
   const params = new URLSearchParams({
     name: cityName,
@@ -84,7 +82,6 @@ function createGeocodingUrl(cityName) {
   return `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`;
 }
 
-// Build the air quality URL from coordinates.
 function createAirQualityUrl(location) {
   const params = new URLSearchParams({
     latitude: location.latitude,
@@ -98,17 +95,14 @@ function createAirQualityUrl(location) {
   return `https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`;
 }
 
-// Turn a city and state into a consistent display label.
 function getLocationLabel(location) {
   return `${location.city}, ${location.state}`;
 }
 
-// Build a secondary label for search suggestions.
 function getLocationDetail(location) {
   return `${location.state}${location.county ? `, ${location.county} County` : ""}`;
 }
 
-// Format numeric values so the dashboard stays easy to scan.
 function formatValue(value, digits = 1) {
   if (value === null || value === undefined || Number.isNaN(value)) {
     return "--";
@@ -117,7 +111,6 @@ function formatValue(value, digits = 1) {
   return Number(value).toFixed(digits);
 }
 
-// Convert API timestamps into friendly local strings.
 function formatLocalDateTime(dateTimeString) {
   const [datePart, timePart] = dateTimeString.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
@@ -133,7 +126,6 @@ function formatLocalDateTime(dateTimeString) {
   });
 }
 
-// Convert the API hour string into a short chart label.
 function formatHourLabel(dateTimeString) {
   const hourValue = Number(dateTimeString.split("T")[1].split(":")[0]);
   const period = hourValue >= 12 ? "PM" : "AM";
@@ -142,19 +134,17 @@ function formatHourLabel(dateTimeString) {
   return `${hour} ${period}`;
 }
 
-// Turn a signed difference into readable comparison text.
 function describeDifference(value, unit, label, mainLocationName, comparisonLocationName) {
   if (value === 0) {
-    return `${mainLocationName} ${label} is the same as ${comparisonLocationName} right now.`;
+    return `${mainLocationName} ${label} matches ${comparisonLocationName} at this update window.`;
   }
 
   const direction = value > 0 ? "higher" : "lower";
   const amount = Math.abs(value).toFixed(unit === "AQI points" ? 0 : 1);
 
-  return `${mainLocationName} ${label} is ${amount} ${unit} ${direction} than ${comparisonLocationName}.`;
+  return `${mainLocationName} reports ${amount} ${unit} ${direction} ${label} than ${comparisonLocationName} in the current readout.`;
 }
 
-// Map AQI values to the requested color ranges.
 function getAqiCategory(aqi) {
   if (aqi <= 50) {
     return { label: "Good", className: "aqi-good" };
@@ -171,24 +161,22 @@ function getAqiCategory(aqi) {
   return { label: "Unhealthy", className: "aqi-unhealthy" };
 }
 
-// Translate AQI into a simple health message.
 function getHealthInterpretation(aqi) {
   if (aqi <= 50) {
-    return "Air quality is good. Safe for outdoor activities.";
+    return "Air quality is favorable for outdoor activity with no broad public health concern.";
   }
 
   if (aqi <= 100) {
-    return "Air quality is moderate. Sensitive individuals should take caution.";
+    return "Conditions are acceptable overall, but residents with respiratory sensitivity should stay alert.";
   }
 
   if (aqi <= 150) {
-    return "Unhealthy for sensitive groups. Limit prolonged outdoor exposure.";
+    return "Sensitive groups should reduce prolonged outdoor exertion while the signal remains elevated.";
   }
 
-  return "Unhealthy. Everyone should reduce outdoor activity.";
+  return "Air conditions are unhealthy and outdoor exposure should be reduced across the general population.";
 }
 
-// Compare the near-term forecast with the later part of the 24-hour window.
 function getTrendMessage(hourlyPm25) {
   const firstWindow = hourlyPm25.slice(0, 3);
   const lastWindow = hourlyPm25.slice(-3);
@@ -202,67 +190,62 @@ function getTrendMessage(hourlyPm25) {
   const difference = lastAverage - firstAverage;
 
   if (difference <= -1) {
-    return "Air quality is improving over the next few hours.";
+    return "Particle load trends downward across the forecast window, suggesting cleaner air later in the cycle.";
   }
 
   if (difference >= 1) {
-    return "Air quality is worsening.";
+    return "Particle load trends upward across the forecast window, suggesting conditions may deteriorate later today.";
   }
 
-  return "Air quality is stable.";
+  return "The forecast window is comparatively steady with no strong rise or drop in particle concentration.";
 }
 
-// Compare current PM2.5 with the EPA annual guideline.
 function getPm25EpaStatus(pm25) {
   if (pm25 > 12) {
-    return "Above EPA guideline";
+    return "Above EPA annual guideline";
   }
 
-  return "Within EPA guideline";
+  return "Within EPA annual guideline";
 }
 
-// Add a simple pollutant source hint for PM2.5.
 function getPm25Hint(pm25) {
   if (pm25 >= 12) {
-    return "Likely from combustion sources such as traffic or wildfire smoke.";
+    return "Elevated fine particles often align with combustion sources such as traffic, industrial activity, or smoke transport.";
   }
 
-  return "Particle pollution is relatively low compared with the EPA annual guideline.";
+  return "Fine particle concentration is comparatively restrained against the EPA annual reference point.";
 }
 
-// Add a simple pollutant source hint for ozone.
 function getOzoneHint(ozone) {
   if (ozone >= 100) {
-    return "Likely driven by sunlight and atmospheric reactions.";
+    return "The ozone signal suggests active sunlight-driven atmospheric chemistry in the current air mass.";
   }
 
-  return "Ozone is present, but a strong sunlight-driven buildup is not obvious right now.";
+  return "The ozone signal is present without a strong photochemical buildup at this update.";
 }
 
-// Infer a likely time-of-day pattern from the forecast curve.
 function getTimePatternInsight(hourlyPm25, hourlyOzone) {
   const morningPm25 = hourlyPm25.slice(0, 6);
   const afternoonOzone = hourlyOzone.slice(10, 16);
 
   if (morningPm25.length === 0 || afternoonOzone.length === 0) {
-    return "Time-of-day insight is limited because forecast coverage is incomplete.";
+    return "Time-of-day interpretation is limited because forecast coverage is incomplete.";
   }
 
   const maxMorningPm25 = Math.max(...morningPm25);
   const maxAfternoonOzone = Math.max(...afternoonOzone);
 
   if (maxAfternoonOzone >= 100) {
-    return "Afternoon ozone peaks are expected due to sunlight and atmospheric chemistry.";
+    return "The later daylight window shows the clearest risk of ozone buildout as sunlight intensifies atmospheric reactions.";
   }
 
   if (maxMorningPm25 >= 12) {
-    return "Morning pollution may be influenced by traffic emissions and other combustion sources.";
+    return "The earlier hours show the stronger particle burden, which often lines up with commute and combustion patterns.";
   }
 
-  return "No strong daily pollution pattern stands out in the current forecast window.";
+  return "No dominant time-of-day pollution signature stands out in the present forecast strip.";
 }
 
-// Flag an unusual current spike if conditions are much higher than nearby forecast hours.
 function getAnomalyMessage(currentPm25, currentAqi, hourlyPm25, hourlyAqi) {
   const nearbyPm25 = hourlyPm25.slice(1, 4);
   const nearbyAqi = hourlyAqi.slice(1, 4);
@@ -275,13 +258,12 @@ function getAnomalyMessage(currentPm25, currentAqi, hourlyPm25, hourlyAqi) {
   const aqiAverage = nearbyAqi.reduce((sum, value) => sum + value, 0) / nearbyAqi.length;
 
   if (currentPm25 >= pm25Average + 5 || currentAqi >= aqiAverage + 20) {
-    return "Unusual spike detected compared with nearby forecast values.";
+    return "Current conditions sit well above nearby forecast values, which flags a short-lived spike worth watching.";
   }
 
-  return "Current values are close to nearby forecast levels.";
+  return "The live reading tracks closely with the surrounding forecast values, so no unusual jump is evident.";
 }
 
-// Show loading feedback while requests are in progress.
 function setLoadingState(target, isLoading, message = "") {
   if (target === "main") {
     dashboardPanel.classList.toggle("is-loading", isLoading);
@@ -300,21 +282,18 @@ function setLoadingState(target, isLoading, message = "") {
   compareSearchButton.disabled = isLoading;
 }
 
-// Hide the main search suggestion menu.
 function clearMainSearchResults() {
   pendingMainMatches = [];
   searchResults.innerHTML = "";
   searchResults.classList.remove("is-visible");
 }
 
-// Hide the comparison search suggestion menu.
 function clearCompareSearchResults() {
   pendingCompareMatches = [];
   compareSearchResults.innerHTML = "";
   compareSearchResults.classList.remove("is-visible");
 }
 
-// Render suggestion buttons for either search box.
 function renderSearchResults(matches, target) {
   const container = target === "main" ? searchResults : compareSearchResults;
 
@@ -342,7 +321,6 @@ function renderSearchResults(matches, target) {
   container.classList.add("is-visible");
 }
 
-// Look up coordinates for a U.S. city using Open Meteo geocoding.
 async function getCoordinates(cityName) {
   const response = await fetch(createGeocodingUrl(cityName));
 
@@ -365,7 +343,6 @@ async function getCoordinates(cityName) {
   }));
 }
 
-// Fetch air quality data for any location.
 async function getAirQualityData(location) {
   const response = await fetch(createAirQualityUrl(location));
 
@@ -386,7 +363,6 @@ async function getAirQualityData(location) {
   return data;
 }
 
-// Update the main dashboard values and analysis cards.
 function updateMainDashboard(data, location) {
   const current = data.current;
   const aqi = Math.round(current.us_aqi);
@@ -398,11 +374,11 @@ function updateMainDashboard(data, location) {
 
   selectedLocation.textContent = locationLabel;
   aqiValue.textContent = aqi;
-  aqiLabel.textContent = `${category.label} in ${locationLabel}`;
+  aqiLabel.textContent = category.label;
   pm25Value.textContent = `${formatValue(current.pm2_5)} ug/m3`;
-  pm10Value.textContent = `${formatValue(current.pm10)} ug/m3`;
-  ozoneValue.textContent = `${formatValue(current.ozone)} ug/m3`;
-  pm25EpaStatus.textContent = `${getPm25EpaStatus(current.pm2_5)} | EPA annual standard for PM2.5 is 12 ug per m3`;
+  pm10Value.textContent = formatValue(current.pm10);
+  ozoneValue.textContent = formatValue(current.ozone);
+  pm25EpaStatus.textContent = `${getPm25EpaStatus(current.pm2_5)} | EPA annual PM2.5 reference: 12 ug/m3`;
   pm25Hint.textContent = getPm25Hint(current.pm2_5);
   ozoneHint.textContent = getOzoneHint(current.ozone);
   updatedValue.textContent = formatLocalDateTime(current.time);
@@ -418,10 +394,9 @@ function updateMainDashboard(data, location) {
   anomalyMessage.textContent = getAnomalyMessage(current.pm2_5, aqi, data.hourly.pm2_5, data.hourly.us_aqi);
 
   statusMessage.classList.remove("error");
-  statusMessage.textContent = `Showing live conditions and forecast data for ${locationLabel}.`;
+  statusMessage.textContent = `Monitoring bulletin updated for ${locationLabel}. Live conditions and forecast strip are active.`;
 }
 
-// Update the comparison summary cards.
 function updateComparisonCards() {
   if (!mainCityState) {
     return;
@@ -455,7 +430,6 @@ function updateComparisonCards() {
   comparisonPm25Difference.textContent = describeDifference(pm25Difference, "ug/m3", "PM2.5", mainLabel, comparisonLabel);
 }
 
-// Draw the 24 hour PM2.5 chart for the selected main city.
 function renderChart(data, location) {
   const labels = data.hourly.time.map((time) => formatHourLabel(time));
   const pm25Values = data.hourly.pm2_5;
@@ -472,13 +446,14 @@ function renderChart(data, location) {
         {
           label: `${getLocationLabel(location)} PM2.5 Forecast`,
           data: pm25Values,
-          borderColor: "#56d39b",
-          backgroundColor: "rgba(86, 211, 155, 0.15)",
+          borderColor: "#bc5c33",
+          backgroundColor: "rgba(188, 92, 51, 0.1)",
           fill: true,
-          tension: 0.35,
-          pointRadius: 2,
-          pointHoverRadius: 4,
-          borderWidth: 2.5
+          tension: 0.28,
+          pointRadius: 1.8,
+          pointHoverRadius: 3.4,
+          pointBackgroundColor: "#16212b",
+          borderWidth: 2
         }
       ]
     },
@@ -489,41 +464,52 @@ function renderChart(data, location) {
         mode: "index",
         intersect: false
       },
+      animation: {
+        duration: 250
+      },
       plugins: {
         legend: {
-          labels: {
-            color: "#e8eef9"
-          }
+          display: false
         },
         tooltip: {
-          displayColors: false
+          displayColors: false,
+          backgroundColor: "rgba(22, 33, 43, 0.94)",
+          titleColor: "#f6f2e8",
+          bodyColor: "#f6f2e8",
+          borderColor: "rgba(201, 161, 78, 0.5)",
+          borderWidth: 1,
+          padding: 10
         }
       },
       scales: {
         x: {
-          title: {
-            display: true,
-            text: "Hour",
-            color: "#a7b4cc"
-          },
           ticks: {
-            color: "#a7b4cc"
+            color: "#435260",
+            maxRotation: 0,
+            autoSkip: true
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.05)"
+            color: "rgba(77, 89, 99, 0.16)",
+            tickLength: 6
+          },
+          border: {
+            color: "rgba(77, 89, 99, 0.5)"
           }
         },
         y: {
+          ticks: {
+            color: "#435260"
+          },
           title: {
             display: true,
-            text: "PM2.5 (ug/m3)",
-            color: "#a7b4cc"
-          },
-          ticks: {
-            color: "#a7b4cc"
+            text: "PM2.5 ug/m3",
+            color: "#435260"
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.05)"
+            color: "rgba(77, 89, 99, 0.16)"
+          },
+          border: {
+            color: "rgba(77, 89, 99, 0.5)"
           }
         }
       }
@@ -531,14 +517,13 @@ function renderChart(data, location) {
   });
 }
 
-// Reset the main dashboard if something fails.
 function showMainError(message) {
   clearMainSearchResults();
   statusMessage.classList.add("error");
   statusMessage.textContent = message;
   aqiCard.classList.remove("aqi-good", "aqi-moderate", "aqi-sensitive", "aqi-unhealthy");
   aqiValue.textContent = "--";
-  aqiLabel.textContent = "Unable to load AQI";
+  aqiLabel.textContent = "Unable to load";
   pm25Value.textContent = "--";
   pm10Value.textContent = "--";
   ozoneValue.textContent = "--";
@@ -562,17 +547,15 @@ function showMainError(message) {
   }
 }
 
-// Reset only the comparison panel if its search fails.
 function showComparisonError(message) {
   clearCompareSearchResults();
   comparisonCityName.textContent = "City not available";
   comparisonCityAqi.textContent = "--";
   comparisonCityPm25.textContent = "--";
   comparisonAqiDifference.textContent = message;
-  comparisonPm25Difference.textContent = "Try another city to update the side-by-side comparison.";
+  comparisonPm25Difference.textContent = "Try another city to refresh the side investigation.";
 }
 
-// Load data for the main city dashboard and chart.
 async function loadMainCity(location) {
   clearMainSearchResults();
   const data = await getAirQualityData(location);
@@ -582,7 +565,6 @@ async function loadMainCity(location) {
   updateComparisonCards();
 }
 
-// Load data for the comparison city panel.
 async function loadComparisonCity(location) {
   clearCompareSearchResults();
   const data = await getAirQualityData(location);
@@ -590,7 +572,6 @@ async function loadComparisonCity(location) {
   updateComparisonCards();
 }
 
-// Search for matches while typing in either input.
 async function fetchSearchMatches(cityName, target) {
   const trimmedCityName = cityName.trim();
   const searchToken = target === "main" ? ++latestMainSearchToken : ++latestCompareSearchToken;
@@ -616,7 +597,7 @@ async function fetchSearchMatches(cityName, target) {
 
     if (target === "main") {
       statusMessage.classList.remove("error");
-      statusMessage.textContent = "Choose the correct city from the menu below.";
+      statusMessage.textContent = "Select the correct city from the lookup ledger below.";
     }
   } catch (error) {
     if (target === "main") {
@@ -627,10 +608,9 @@ async function fetchSearchMatches(cityName, target) {
   }
 }
 
-// Pick a selected main-city match and load its dashboard.
 function selectMainMatch(location) {
   cityInput.value = getLocationLabel(location);
-  setLoadingState("main", true, `Loading air quality data for ${getLocationLabel(location)}...`);
+  setLoadingState("main", true, `Loading monitoring bulletin for ${getLocationLabel(location)}...`);
 
   loadMainCity(location)
     .catch((error) => {
@@ -641,7 +621,6 @@ function selectMainMatch(location) {
     });
 }
 
-// Pick a comparison-city match and update the comparison panel.
 function selectCompareMatch(location) {
   compareCityInput.value = getLocationLabel(location);
   setLoadingState("compare", true);
@@ -655,7 +634,6 @@ function selectCompareMatch(location) {
     });
 }
 
-// Live suggestions for the main search input.
 cityInput.addEventListener("input", () => {
   window.clearTimeout(mainSearchDebounceId);
 
@@ -666,7 +644,7 @@ cityInput.addEventListener("input", () => {
 
     if (!typedValue && mainCityState) {
       statusMessage.classList.remove("error");
-      statusMessage.textContent = `Showing live conditions and forecast data for ${getLocationLabel(mainCityState.location)}.`;
+      statusMessage.textContent = `Monitoring bulletin active for ${getLocationLabel(mainCityState.location)}.`;
     }
 
     return;
@@ -677,7 +655,6 @@ cityInput.addEventListener("input", () => {
   }, 250);
 });
 
-// Live suggestions for the comparison search input.
 compareCityInput.addEventListener("input", () => {
   window.clearTimeout(compareSearchDebounceId);
 
@@ -693,7 +670,6 @@ compareCityInput.addEventListener("input", () => {
   }, 250);
 });
 
-// Allow Enter to load the best main-city match.
 citySearchForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -708,11 +684,10 @@ citySearchForm.addEventListener("submit", (event) => {
   if (cityInput.value.trim().length >= 2) {
     fetchSearchMatches(cityInput.value, "main");
   } else {
-    showMainError("Enter a U.S. city to search.");
+    showMainError("Enter a U.S. city to start the monitoring bulletin.");
   }
 });
 
-// Allow Enter to load the best comparison-city match.
 compareSearchForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -727,11 +702,10 @@ compareSearchForm.addEventListener("submit", (event) => {
   if (compareCityInput.value.trim().length >= 2) {
     fetchSearchMatches(compareCityInput.value, "compare");
   } else {
-    showComparisonError("Enter a comparison city to begin the side-by-side analysis.");
+    showComparisonError("Enter a comparison city to begin the side investigation.");
   }
 });
 
-// Load the selected main-city suggestion.
 searchResults.addEventListener("click", (event) => {
   const resultButton = event.target.closest(".result-option");
 
@@ -746,7 +720,6 @@ searchResults.addEventListener("click", (event) => {
   }
 });
 
-// Load the selected comparison-city suggestion.
 compareSearchResults.addEventListener("click", (event) => {
   const resultButton = event.target.closest(".result-option");
 
@@ -761,7 +734,6 @@ compareSearchResults.addEventListener("click", (event) => {
   }
 });
 
-// Close suggestion menus when the user clicks away.
 document.addEventListener("click", (event) => {
   if (!citySearchForm.contains(event.target)) {
     clearMainSearchResults();
@@ -772,11 +744,10 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Load default main and comparison cities when the page opens.
 cityInput.value = defaultLocation.city;
 compareCityInput.value = defaultComparisonLocation.city;
 
-setLoadingState("main", true, `Loading air quality data for ${getLocationLabel(defaultLocation)}...`);
+setLoadingState("main", true, `Loading monitoring bulletin for ${getLocationLabel(defaultLocation)}...`);
 setLoadingState("compare", true);
 
 Promise.allSettled([

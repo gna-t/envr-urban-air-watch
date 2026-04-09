@@ -6,224 +6,285 @@
   <title>Urban Air Watch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="page-shell">
-    <header class="hero">
-      <h1>Urban Air Watch</h1>
-      <p class="hero-copy">
-        Air quality shapes how safe it is to exercise, commute, and spend time outdoors.
-        This portfolio piece tracks current conditions, forecasted change, and simple environmental patterns across cities in the United States.
-      </p>
+  <div class="site-frame">
+    <header class="briefing-header">
+      <div class="briefing-header__identity">
+        <p class="kicker">Urban Atmosphere Monitoring Bulletin</p>
+        <h1>Urban Air Watch</h1>
+        <p class="briefing-purpose" id="briefing-purpose">
+          Live urban exposure snapshot for commuters, outdoor activity planning, and public health context.
+        </p>
+      </div>
+
+      <div class="briefing-header__meta">
+        <div class="meta-row">
+          <span class="meta-label">Selected City</span>
+          <strong class="meta-value" id="selected-location">Houston, Texas</strong>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Current Status</span>
+          <strong class="meta-value" id="aqi-label">Waiting for data</strong>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Last Updated</span>
+          <strong class="meta-value" id="updated-value">--</strong>
+        </div>
+      </div>
     </header>
 
-    <main>
-      <section class="panel dashboard-panel" aria-labelledby="dashboard-title">
-        <div class="panel-header">
-          <div>
-            <p class="section-label">Live Data Dashboard</p>
-            <h2 id="dashboard-title">Current Air Quality</h2>
-            <p class="selected-location" id="selected-location">Houston, Texas</p>
-          </div>
-
-          <form class="search-form" id="city-search-form">
-            <label class="search-label" for="city-input">Search Main City</label>
-            <div class="search-controls">
-              <input
-                id="city-input"
-                type="text"
-                name="city"
-                placeholder="Enter a U.S. city"
-                autocomplete="off"
-                aria-label="Enter a U.S. city"
-              >
-              <button type="submit" id="search-button">Search</button>
+    <main class="bulletin-layout">
+      <section class="monitoring-grid">
+        <section class="monitoring-main dashboard-panel" aria-labelledby="signal-title">
+          <div class="module-bar">
+            <div>
+              <p class="section-tag">Live Monitoring</p>
+              <h2 id="signal-title">Current Air Signal</h2>
             </div>
-            <div class="search-results" id="search-results" role="listbox" aria-label="Matching U.S. cities"></div>
-          </form>
-        </div>
 
-        <div id="status-message" class="status-message" role="status" aria-live="polite">
-          Loading air quality data...
-        </div>
-
-        <div class="dashboard-top-grid">
-          <article class="metric-card metric-card--aqi" id="aqi-card">
-            <p class="metric-label">AQI</p>
-            <h3 id="aqi-value">--</h3>
-            <p class="metric-detail" id="aqi-label">Waiting for data</p>
-          </article>
-
-          <article class="insight-card">
-            <p class="metric-label">Health Interpretation</p>
-            <h3 id="health-title">Current Guidance</h3>
-            <p class="insight-copy" id="health-message">Health guidance will update when air quality data loads.</p>
-          </article>
-        </div>
-
-        <div class="dashboard-grid">
-          <article class="metric-card">
-            <p class="metric-label">PM2.5</p>
-            <h3 id="pm25-value">--</h3>
-            <p class="metric-detail">micrograms per cubic meter</p>
-            <p class="metric-badge" id="pm25-epa-status">EPA guideline status will appear here.</p>
-            <p class="pollutant-hint" id="pm25-hint">Source interpretation will appear here.</p>
-          </article>
-
-          <article class="metric-card">
-            <p class="metric-label">PM10</p>
-            <h3 id="pm10-value">--</h3>
-            <p class="metric-detail">micrograms per cubic meter</p>
-          </article>
-
-          <article class="metric-card">
-            <p class="metric-label">Ozone</p>
-            <h3 id="ozone-value">--</h3>
-            <p class="metric-detail">micrograms per cubic meter</p>
-            <p class="pollutant-hint" id="ozone-hint">Source interpretation will appear here.</p>
-          </article>
-
-          <article class="metric-card">
-            <p class="metric-label">Last Updated</p>
-            <h3 id="updated-value">--</h3>
-            <p class="metric-detail" id="updated-city-label">Local time for Houston, Texas</p>
-          </article>
-        </div>
-
-        <div class="analysis-grid">
-          <article class="analysis-card">
-            <p class="metric-label">Trend Analysis</p>
-            <h3 id="trend-title">Short-Term Direction</h3>
-            <p class="insight-copy" id="trend-message">Trend analysis will appear when forecast data is available.</p>
-          </article>
-
-          <article class="analysis-card">
-            <p class="metric-label">Time of Day Insight</p>
-            <h3 id="time-pattern-title">Daily Pattern</h3>
-            <p class="insight-copy" id="time-pattern-message">Time-of-day interpretation will appear when forecast data is available.</p>
-          </article>
-
-          <article class="analysis-card">
-            <p class="metric-label">Anomaly Detection</p>
-            <h3 id="anomaly-title">Current Spike Check</h3>
-            <p class="insight-copy" id="anomaly-message">Spike detection will update when current and forecast data are available.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel comparison-panel" aria-labelledby="comparison-title">
-        <div class="panel-header">
-          <div>
-            <p class="section-label">Comparison</p>
-            <h2 id="comparison-title">Compare Two Cities</h2>
+            <form class="search-form search-form--main" id="city-search-form">
+              <label class="search-label" for="city-input">Search Main City</label>
+              <div class="search-controls">
+                <input
+                  id="city-input"
+                  type="text"
+                  name="city"
+                  placeholder="Enter a U.S. city"
+                  autocomplete="off"
+                  aria-label="Enter a U.S. city"
+                >
+                <button type="submit" id="search-button">Load</button>
+              </div>
+              <div class="search-results" id="search-results" role="listbox" aria-label="Matching U.S. cities"></div>
+            </form>
           </div>
 
-          <form class="search-form" id="compare-search-form">
-            <label class="search-label" for="compare-city-input">Compare With Another City</label>
-            <div class="search-controls">
-              <input
-                id="compare-city-input"
-                type="text"
-                name="compare-city"
-                placeholder="Enter a U.S. city"
-                autocomplete="off"
-                aria-label="Compare with another U.S. city"
-              >
-              <button type="submit" id="compare-search-button">Compare</button>
+          <div id="status-message" class="status-message" role="status" aria-live="polite">
+            Loading air quality data...
+          </div>
+
+          <div class="signal-cluster">
+            <article class="aqi-module" id="aqi-card">
+              <div class="aqi-module__header">
+                <p class="eyebrow-label">AQI Signal</p>
+                <div class="city-badge" id="updated-city-label">Local time for Houston, Texas</div>
+              </div>
+
+              <div class="aqi-core">
+                <div class="aqi-scale" aria-hidden="true">
+                  <span class="aqi-band aqi-band--good">0-50</span>
+                  <span class="aqi-band aqi-band--moderate">51-100</span>
+                  <span class="aqi-band aqi-band--sensitive">101-150</span>
+                  <span class="aqi-band aqi-band--unhealthy">151+</span>
+                </div>
+
+                <div class="aqi-readout">
+                  <p class="aqi-value" id="aqi-value">--</p>
+                  <p class="aqi-caption">U.S. Air Quality Index</p>
+                </div>
+              </div>
+
+              <div class="health-brief">
+                <p class="eyebrow-label">Health Interpretation</p>
+                <h3 id="health-title">Current Guidance</h3>
+                <p id="health-message">Health guidance will update when air quality data loads.</p>
+              </div>
+            </article>
+
+            <article class="readout-module">
+              <div class="readout-module__header">
+                <p class="section-tag">Particle Load</p>
+                <p class="readout-note">Dense readout from the latest modeled station grid.</p>
+              </div>
+
+              <div class="instrument-strip instrument-strip--pm25">
+                <div>
+                  <p class="instrument-label">PM2.5</p>
+                  <p class="instrument-unit">micrograms per cubic meter</p>
+                </div>
+                <div class="instrument-value" id="pm25-value">--</div>
+                <div class="instrument-aside">
+                  <p class="instrument-status" id="pm25-epa-status">EPA guideline status will appear here.</p>
+                  <p class="instrument-hint" id="pm25-hint">Source interpretation will appear here.</p>
+                </div>
+              </div>
+
+              <div class="instrument-ledger">
+                <div class="ledger-row">
+                  <span class="ledger-label">PM10</span>
+                  <strong class="ledger-value" id="pm10-value">--</strong>
+                  <span class="ledger-unit">ug/m3</span>
+                </div>
+                <div class="ledger-row ledger-row--annotated">
+                  <span class="ledger-label">Ozone</span>
+                  <strong class="ledger-value" id="ozone-value">--</strong>
+                  <span class="ledger-unit">ug/m3</span>
+                </div>
+                <p class="instrument-hint instrument-hint--footer" id="ozone-hint">Source interpretation will appear here.</p>
+              </div>
+            </article>
+          </div>
+
+          <article class="insight-rail" aria-labelledby="insight-rail-title">
+            <div class="insight-rail__head">
+              <p class="section-tag">Urban Exposure Snapshot</p>
+              <h3 id="insight-rail-title">Short-Term Analysis Rail</h3>
             </div>
-            <div class="search-results" id="compare-search-results" role="listbox" aria-label="Matching comparison cities"></div>
-          </form>
-        </div>
 
-        <div class="comparison-grid">
-          <article class="comparison-card">
-            <p class="metric-label">Main City</p>
-            <h3 id="main-comparison-city">Houston, Texas</h3>
-            <p class="comparison-value"><span>AQI</span><strong id="main-comparison-aqi">--</strong></p>
-            <p class="comparison-value"><span>PM2.5</span><strong id="main-comparison-pm25">--</strong></p>
+            <div class="insight-track">
+              <section class="insight-block">
+                <p class="eyebrow-label">Trend Analysis</p>
+                <h4 id="trend-title">Short-Term Direction</h4>
+                <p id="trend-message">Trend analysis will appear when forecast data is available.</p>
+              </section>
+
+              <section class="insight-block">
+                <p class="eyebrow-label">Time of Day Insight</p>
+                <h4 id="time-pattern-title">Daily Pattern</h4>
+                <p id="time-pattern-message">Time-of-day interpretation will appear when forecast data is available.</p>
+              </section>
+
+              <section class="insight-block">
+                <p class="eyebrow-label">Anomaly Detection</p>
+                <h4 id="anomaly-title">Current Spike Check</h4>
+                <p id="anomaly-message">Spike detection will update when current and forecast data are available.</p>
+              </section>
+            </div>
+          </article>
+        </section>
+
+        <aside class="monitoring-side comparison-panel" aria-labelledby="comparison-title">
+          <div class="module-bar module-bar--stacked">
+            <div>
+              <p class="section-tag">Cross City Comparison</p>
+              <h2 id="comparison-title">Side Investigation</h2>
+            </div>
+
+            <form class="search-form search-form--compare" id="compare-search-form">
+              <label class="search-label" for="compare-city-input">Compare With Another City</label>
+              <div class="search-controls">
+                <input
+                  id="compare-city-input"
+                  type="text"
+                  name="compare-city"
+                  placeholder="Enter a U.S. city"
+                  autocomplete="off"
+                  aria-label="Compare with another U.S. city"
+                >
+                <button type="submit" id="compare-search-button">Compare</button>
+              </div>
+              <div class="search-results" id="compare-search-results" role="listbox" aria-label="Matching comparison cities"></div>
+            </form>
+          </div>
+
+          <article class="comparison-board">
+            <div class="comparison-ledger comparison-ledger--main">
+              <p class="eyebrow-label">Primary City</p>
+              <h3 id="main-comparison-city">Houston, Texas</h3>
+              <div class="comparison-line">
+                <span>AQI</span>
+                <strong id="main-comparison-aqi">--</strong>
+              </div>
+              <div class="comparison-line">
+                <span>PM2.5</span>
+                <strong id="main-comparison-pm25">--</strong>
+              </div>
+            </div>
+
+            <div class="comparison-divider" aria-hidden="true"></div>
+
+            <div class="comparison-ledger">
+              <p class="eyebrow-label">Comparison City</p>
+              <h3 id="comparison-city-name">Search for a city</h3>
+              <div class="comparison-line">
+                <span>AQI</span>
+                <strong id="comparison-city-aqi">--</strong>
+              </div>
+              <div class="comparison-line">
+                <span>PM2.5</span>
+                <strong id="comparison-city-pm25">--</strong>
+              </div>
+            </div>
           </article>
 
-          <article class="comparison-card">
-            <p class="metric-label">Comparison City</p>
-            <h3 id="comparison-city-name">Search for a city</h3>
-            <p class="comparison-value"><span>AQI</span><strong id="comparison-city-aqi">--</strong></p>
-            <p class="comparison-value"><span>PM2.5</span><strong id="comparison-city-pm25">--</strong></p>
-          </article>
-        </div>
+          <article class="comparison-notes">
+            <section class="note-strip">
+              <p class="eyebrow-label">AQI Delta</p>
+              <p id="comparison-aqi-difference">Search for a second city to compare current AQI.</p>
+            </section>
 
-        <div class="difference-grid">
-          <article class="difference-card">
-            <p class="metric-label">AQI Difference</p>
-            <p class="insight-copy" id="comparison-aqi-difference">Search for a second city to compare current AQI.</p>
+            <section class="note-strip">
+              <p class="eyebrow-label">Particle Delta</p>
+              <p id="comparison-pm25-difference">Search for a second city to compare particle pollution.</p>
+            </section>
           </article>
 
-          <article class="difference-card">
-            <p class="metric-label">PM2.5 Difference</p>
-            <p class="insight-copy" id="comparison-pm25-difference">Search for a second city to compare particle pollution.</p>
+          <article class="forecast-panel chart-panel" aria-labelledby="chart-title">
+            <div class="module-bar module-bar--compact">
+              <div>
+                <p class="section-tag">Forecast Window</p>
+                <h2 id="chart-title">PM2.5 Trend Monitor</h2>
+              </div>
+            </div>
+
+            <div class="chart-wrap">
+              <canvas id="air-quality-chart"></canvas>
+            </div>
+
+            <p class="chart-caption">The line tracks the next 24 forecast hours of PM2.5 so short-lived spikes and cleaner windows are easier to spot.</p>
+            <p class="source-note">Data source: Open-Meteo geocoding and air quality APIs.</p>
+          </article>
+        </aside>
+      </section>
+
+      <section class="technical-notes" aria-labelledby="technical-notes-title">
+        <div class="technical-notes__header">
+          <p class="section-tag">Briefing Attachments</p>
+          <h2 id="technical-notes-title">Technical Notes</h2>
+        </div>
+
+        <div class="technical-notes__grid">
+          <article class="report-note">
+            <p class="report-index">01</p>
+            <div>
+              <p class="eyebrow-label">Daily Pattern Note</p>
+              <h3>Urban Air Case Study</h3>
+              <p class="report-copy" id="observations-copy">
+                Urban air pollution often changes through the day. Morning and evening traffic can raise particle pollution such as PM2.5, while stronger sunlight in the afternoon can help ozone build through atmospheric chemistry. That means a city may see one kind of pollution peak during busy travel hours and another later in the day as weather, emissions, and sunlight interact.
+              </p>
+            </div>
+          </article>
+
+          <article class="report-note">
+            <p class="report-index">02</p>
+            <div>
+              <p class="eyebrow-label">Data Confidence</p>
+              <h3>Limitations and Uncertainty</h3>
+              <p class="report-copy">
+                Data may be modeled or interpolated, and not all cities have direct monitoring stations in the exact location shown here. Values may differ from local EPA monitors because this interface uses gridded Open-Meteo air quality data rather than a single nearby sensor.
+              </p>
+            </div>
+          </article>
+
+          <article class="report-note">
+            <p class="report-index">03</p>
+            <div>
+              <p class="eyebrow-label">Method Notes</p>
+              <h3>How This Bulletin Works</h3>
+              <p class="report-copy">
+                The page first uses the Open-Meteo geocoding API to turn a city search into latitude and longitude. It then requests current and hourly air quality data from the Open-Meteo air quality API. Trend messages come from comparing the next three forecast hours with the last three forecast hours in the 24-hour dataset, while interpretation notes use simple AQI and pollutant thresholds to explain what the numbers may mean.
+              </p>
+            </div>
           </article>
         </div>
-      </section>
-
-      <section class="panel chart-panel" aria-labelledby="chart-title">
-        <div class="panel-header">
-          <div>
-            <p class="section-label">Chart</p>
-            <h2 id="chart-title">Next 24 Hours of PM2.5</h2>
-          </div>
-          <p class="chart-note">A quick look at short-term air quality changes.</p>
-        </div>
-
-        <div class="chart-wrap">
-          <canvas id="air-quality-chart"></canvas>
-        </div>
-
-        <p class="source-note">Data from Open Meteo APIs.</p>
-      </section>
-
-      <section class="panel observations-panel" aria-labelledby="observations-title">
-        <div class="panel-header">
-          <div>
-            <p class="section-label">Observations</p>
-            <h2 id="observations-title">Urban Air Case Study</h2>
-          </div>
-        </div>
-
-        <p class="observations-copy" id="observations-copy">
-          Urban air pollution often changes through the day. Morning and evening traffic can raise particle pollution such as PM2.5, while stronger sunlight in the afternoon can help ozone build through atmospheric chemistry. That means a city may see one kind of pollution peak during busy travel hours and another later in the day as weather, emissions, and sunlight interact.
-        </p>
-      </section>
-
-      <section class="panel limitations-panel" aria-labelledby="limitations-title">
-        <div class="panel-header">
-          <div>
-            <p class="section-label">Data Quality</p>
-            <h2 id="limitations-title">Limitations and Uncertainty</h2>
-          </div>
-        </div>
-
-        <p class="observations-copy">
-          Data may be modeled or interpolated, and not all cities have direct monitoring stations in the exact location shown here. Values may differ from local EPA monitors because this dashboard uses gridded Open Meteo air quality data rather than a single nearby sensor.
-        </p>
-      </section>
-
-      <section class="panel methodology-panel" aria-labelledby="methodology-title">
-        <div class="panel-header">
-          <div>
-            <p class="section-label">Methodology</p>
-            <h2 id="methodology-title">How This Dashboard Works</h2>
-          </div>
-        </div>
-
-        <p class="observations-copy">
-          The dashboard first uses the Open Meteo Geocoding API to turn a city search into latitude and longitude. It then requests current and hourly air quality data from the Open Meteo Air Quality API. Trend messages come from comparing the next three forecast hours with the last three forecast hours in the 24-hour dataset, while interpretation notes use simple AQI and pollutant thresholds to explain what the numbers may mean.
-        </p>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>Data source: Open Meteo Geocoding API and Open Meteo Air Quality API.</p>
+      <p>Urban Air Watch monitors city-scale modeled air conditions for public-facing interpretation.</p>
       <p>Created by Nhat Phan.</p>
     </footer>
   </div>
