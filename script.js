@@ -157,13 +157,13 @@ function formatHourLabel(dateTimeString) {
 // Turn a signed difference into readable comparison text.
 function describeDifference(value, unit, label, mainLocationName, comparisonLocationName) {
   if (value === 0) {
-    return `${mainLocationName} ${label} is the same as ${comparisonLocationName} right now.`;
+    return `${mainLocationName} and ${comparisonLocationName} are aligned on ${label} at this reporting window.`;
   }
 
   const direction = value > 0 ? "higher" : "lower";
   const amount = Math.abs(value).toFixed(unit === "AQI points" ? 0 : 1);
 
-  return `${mainLocationName} ${label} is ${amount} ${unit} ${direction} than ${comparisonLocationName}.`;
+  return `${mainLocationName} is reporting ${amount} ${unit} ${direction} ${label} than ${comparisonLocationName}.`;
 }
 
 // Map AQI values to the requested color ranges.
@@ -410,11 +410,11 @@ function updateMainDashboard(data, location) {
 
   selectedLocation.textContent = locationLabel;
   aqiValue.textContent = aqi;
-  aqiLabel.textContent = `${category.label} in ${locationLabel}`;
+  aqiLabel.textContent = category.label;
   pm25Value.textContent = `${formatValue(current.pm2_5)} ug/m3`;
-  pm10Value.textContent = `${formatValue(current.pm10)} ug/m3`;
-  ozoneValue.textContent = `${formatValue(current.ozone)} ug/m3`;
-  pm25EpaStatus.textContent = `${getPm25EpaStatus(current.pm2_5)} | EPA annual standard for PM2.5 is 12 ug per m3`;
+  pm10Value.textContent = formatValue(current.pm10);
+  ozoneValue.textContent = formatValue(current.ozone);
+  pm25EpaStatus.textContent = `${getPm25EpaStatus(current.pm2_5)} | EPA annual PM2.5 reference: 12 ug/m3`;
   pm25Hint.textContent = getPm25Hint(current.pm2_5);
   ozoneHint.textContent = getOzoneHint(current.ozone);
   updatedValue.textContent = formatLocalDateTime(current.time);
@@ -431,7 +431,7 @@ function updateMainDashboard(data, location) {
   anomalyMessage.textContent = getAnomalyMessage(current.pm2_5, aqi, data.hourly.pm2_5, data.hourly.us_aqi);
 
   statusMessage.classList.remove("error");
-  statusMessage.textContent = `Showing live conditions and forecast data for ${locationLabel}.`;
+  statusMessage.textContent = `Monitoring bulletin updated for ${locationLabel}. Live conditions and forecast strip are active.`;
 }
 
 // Update the comparison summary cards.
@@ -448,12 +448,12 @@ function updateComparisonCards() {
   mainComparisonPm25.textContent = `${formatValue(mainCurrent.pm2_5)} ug/m3`;
 
   if (!comparisonCityState) {
-    comparisonCityName.textContent = "Search for a city";
-    comparisonCityAqi.textContent = "--";
-    comparisonCityPm25.textContent = "--";
-    comparisonAqiDifference.textContent = "Search for a second city to compare current AQI.";
-    comparisonPm25Difference.textContent = "Search for a second city to compare particle pollution.";
-    return;
+  comparisonCityName.textContent = "Search for a city";
+  comparisonCityAqi.textContent = "--";
+  comparisonCityPm25.textContent = "--";
+  comparisonAqiDifference.textContent = "Search for a second city to compare the current AQI signal.";
+  comparisonPm25Difference.textContent = "Search for a second city to compare the particle load report.";
+  return;
   }
 
   const comparisonCurrent = comparisonCityState.data.current;
@@ -485,13 +485,14 @@ function renderChart(data, location) {
         {
           label: `${getLocationLabel(location)} PM2.5 Forecast`,
           data: pm25Values,
-          borderColor: "#56d39b",
-          backgroundColor: "rgba(86, 211, 155, 0.15)",
+          borderColor: "#bc5c33",
+          backgroundColor: "rgba(188, 92, 51, 0.1)",
           fill: true,
-          tension: 0.35,
-          pointRadius: 2,
-          pointHoverRadius: 4,
-          borderWidth: 2.5
+          tension: 0.28,
+          pointRadius: 1.8,
+          pointHoverRadius: 3.4,
+          pointBackgroundColor: "#16212b",
+          borderWidth: 2
         }
       ]
     },
@@ -502,41 +503,52 @@ function renderChart(data, location) {
         mode: "index",
         intersect: false
       },
+      animation: {
+        duration: 250
+      },
       plugins: {
         legend: {
-          labels: {
-            color: "#e8eef9"
-          }
+          display: false
         },
         tooltip: {
-          displayColors: false
+          displayColors: false,
+          backgroundColor: "rgba(22, 33, 43, 0.94)",
+          titleColor: "#f6f2e8",
+          bodyColor: "#f6f2e8",
+          borderColor: "rgba(201, 161, 78, 0.5)",
+          borderWidth: 1,
+          padding: 10
         }
       },
       scales: {
         x: {
-          title: {
-            display: true,
-            text: "Hour",
-            color: "#a7b4cc"
-          },
           ticks: {
-            color: "#a7b4cc"
+            color: "#435260",
+            maxRotation: 0,
+            autoSkip: true
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.05)"
+            color: "rgba(77, 89, 99, 0.16)",
+            tickLength: 6
+          },
+          border: {
+            color: "rgba(77, 89, 99, 0.5)"
           }
         },
         y: {
           title: {
             display: true,
-            text: "PM2.5 (ug/m3)",
-            color: "#a7b4cc"
+            text: "PM2.5 ug/m3",
+            color: "#435260"
           },
           ticks: {
-            color: "#a7b4cc"
+            color: "#435260"
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.05)"
+            color: "rgba(77, 89, 99, 0.16)"
+          },
+          border: {
+            color: "rgba(77, 89, 99, 0.5)"
           }
         }
       }
@@ -551,7 +563,7 @@ function showMainError(message) {
   statusMessage.textContent = message;
   aqiCard.classList.remove("aqi-good", "aqi-moderate", "aqi-sensitive", "aqi-unhealthy");
   aqiValue.textContent = "--";
-  aqiLabel.textContent = "Unable to load AQI";
+  aqiLabel.textContent = "Unable to load";
   pm25Value.textContent = "--";
   pm10Value.textContent = "--";
   ozoneValue.textContent = "--";
@@ -583,7 +595,7 @@ function showComparisonError(message) {
   comparisonCityAqi.textContent = "--";
   comparisonCityPm25.textContent = "--";
   comparisonAqiDifference.textContent = message;
-  comparisonPm25Difference.textContent = "Try another city to update the side-by-side comparison.";
+  comparisonPm25Difference.textContent = "Try another city to refresh the side investigation.";
 }
 
 // Load data for the main city dashboard and chart.
@@ -630,7 +642,7 @@ async function fetchSearchMatches(cityName, target) {
 
     if (target === "main") {
       statusMessage.classList.remove("error");
-      statusMessage.textContent = "Choose the correct city from the menu below.";
+      statusMessage.textContent = "Select the matching city from the bulletin search list.";
     }
   } catch (error) {
     if (target === "main") {
@@ -680,7 +692,7 @@ cityInput.addEventListener("input", () => {
 
     if (!typedValue && mainCityState) {
       statusMessage.classList.remove("error");
-      statusMessage.textContent = `Showing live conditions and forecast data for ${getLocationLabel(mainCityState.location)}.`;
+      statusMessage.textContent = `Monitoring bulletin updated for ${getLocationLabel(mainCityState.location)}. Live conditions and forecast strip are active.`;
     }
 
     return;
