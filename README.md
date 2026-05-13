@@ -40,7 +40,7 @@ No API key required. Fully client side.
 
 The dashboard pulls:
 - Current AQI and pollutant levels  
-- Hourly PM2.5, AQI, and ozone forecasts :contentReference[oaicite:0]{index=0}  
+- Hourly PM2.5, AQI, and ozone forecasts  
 
 ---
 
@@ -70,7 +70,7 @@ The dashboard pulls:
 
 ### Trend Detection
 - Compares early vs later forecast values  
-- Identifies if air quality is improving or worsening :contentReference[oaicite:1]{index=1}  
+- Identifies if air quality is improving or worsening  
 
 ### Daily Pattern Insight
 - Detects patterns like:
@@ -91,8 +91,8 @@ The dashboard pulls:
 ## Project Structure
 
 - index.html → layout and dashboard UI  
-- script.js → data fetching, analysis logic, comparisons :contentReference[oaicite:2]{index=2}  
-- style.css → full UI system and layout design :contentReference[oaicite:3]{index=3}  
+- script.js → data fetching, analysis logic, comparisons  
+- style.css → full UI system and layout design  
 
 ---
 
